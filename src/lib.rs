@@ -2,6 +2,7 @@ use std::collections::hash_map::{DefaultHasher};
 use std::hash::{BuildHasher, Hash, Hasher};
 use std::mem;
 use std::borrow::Borrow;
+use std::iter::FromIterator;
 
 const INITIAL_NBUCKETS: usize = 1;
 
@@ -21,7 +22,6 @@ impl<'a, K: 'a, V: 'a> VacantEntry<'a, K, V> {
         where
             K: Hash + Eq
     {
-
         self.map.buckets[self.bucket].push((self.key, value));
         self.map.items += 1;
         &mut self.map.buckets[self.bucket].last_mut().unwrap().1
@@ -238,6 +238,16 @@ impl<'a, K, V> IntoIterator for &'a HashMap<K, V> {
     }
 }
 
+
+impl<K, V> FromIterator<(K, V)> for HashMap<K, V> where K: Hash + Eq {
+    fn from_iter<T: IntoIterator<Item=(K, V)>>(iter: T) -> Self {
+        let mut map = HashMap::new();
+        for (k, v) in iter {
+            map.insert(k, v);
+        }
+        map
+    }
+}
 
 #[cfg(test)]
 mod tests {
